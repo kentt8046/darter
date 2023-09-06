@@ -1,3 +1,74 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:isolate';
+
+import 'package:args/command_runner.dart';
+import 'package:darter/darter.dart';
+
+final taskFile = File("${Directory.current.path}/tools/tasks.dart");
+
+Future<void> main(List<String> args) async {
+  if (await taskFile.exists()) {
+    final onExit = ReceivePort();
+    await Isolate.spawnUri(
+      taskFile.uri,
+      args,
+      null,
+      onExit: onExit.sendPort,
+    );
+
+    await onExit.first;
+    return;
+  }
+
+  final runner = CommandRunner("darter", "A simple task runner.")
+    ..addCommand(InitCommand());
+
+  int code;
+  try {
+    await runner.run(args);
+    code = 0;
+  } on UsageException catch (e) {
+    stderr
+      ..writeln(e.message)
+      ..writeln("")
+      ..writeln(e.usage);
+    code = 0;
+  } on DarterException catch (e) {
+    stderr.writeln(e.message);
+    code = 1;
+  }
+
+  exit(code);
+}
+
+class InitCommand extends Command {
+  @override
+  final name = "init";
+
+  @override
+  final description = "Initialize a new `tasks.dart`.";
+
+  InitCommand() {
+    argParser.addFlag(
+      "force",
+      abbr: "f",
+      help: "Force overwrite if `tasks.dart` already exists.",
+      defaultsTo: false,
+    );
+  }
+
+  @override
+  Future<void> run() async {
+    final force = argResults!["force"] as bool;
+
+    if (!force && await taskFile.exists()) {
+      fail("tools/tasks.dart already exists.");
+    }
+
+    await Directory("tools").create(recursive: true);
+
+    await taskFile.writeAsString(r'''
 import 'package:darter/darter.dart';
 
 void main(List<String> args) {
@@ -99,3 +170,6 @@ final watchSources = Task(
     );
   },
 );
+''');
+  }
+}

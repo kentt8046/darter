@@ -1,5 +1,5 @@
 name: darter
-description: A starting point for Dart libraries or applications.
+description: A simple task runner.
 version: 0.0.1
 repository: https://github.com/kentt8046/darter
 
@@ -8,7 +8,11 @@ environment:
 
 dependencies:
   args: ^2.4.2
+  glob: ^2.1.2
 
 dev_dependencies:
   lints: ^2.0.0
   test: ^1.21.0
+
+executables:
+  darter:

@@ -24,6 +24,9 @@ void run(List<String> args, List<Task> tasks) async {
       ..writeln("")
       ..writeln(e.usage);
     code = 64;
+  } on DarterException catch (e) {
+    stderr.writeln(e.message);
+    code = 1;
   }
 
   exit(code);
@@ -72,6 +75,7 @@ class _TaskCommand extends Command {
       }
 
       String? valueHelp;
+      List<String>? allowed;
       var multiple = false;
 
       final [name, ...valueHelps] = parts;
@@ -79,6 +83,15 @@ class _TaskCommand extends Command {
         final [help] = valueHelps;
         multiple = help.endsWith("...");
         valueHelp = help.replaceAll("...", "").trim();
+        if (valueHelp.startsWith("[") && valueHelp.endsWith("]")) {
+          allowed = [
+            ...valueHelp
+                .substring(1, valueHelp.length - 1)
+                .split(",")
+                .map((e) => e.trim()),
+          ];
+          valueHelp = multiple ? "values" : "value";
+        }
       }
 
       final names = name.split(",").map((e) => e.trim());
@@ -102,10 +115,10 @@ class _TaskCommand extends Command {
 
       if (multiple) {
         argParser.addMultiOption(optionName,
-            abbr: abbr, help: help, valueHelp: valueHelp);
+            abbr: abbr, help: help, valueHelp: valueHelp, allowed: allowed);
       } else {
         argParser.addOption(optionName,
-            abbr: abbr, help: help, valueHelp: valueHelp);
+            abbr: abbr, help: help, valueHelp: valueHelp, allowed: allowed);
       }
     }
   }
