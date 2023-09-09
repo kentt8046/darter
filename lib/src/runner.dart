@@ -1,15 +1,21 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' hide stdin;
 
 import 'package:args/command_runner.dart';
 
-import '../darter.dart';
+import '_internal/completion.dart';
+import '_internal/stdin.dart';
+import 'context.dart';
+import 'exception.dart';
+import 'style.dart';
+import 'task.dart';
 
 String name = "darter";
 String description = "A simple task runner.";
 
 void run(List<String> args, List<Task> tasks) async {
-  final runner = CommandRunner(name, description);
+  final runner = CommandRunner(name, description)
+    ..addCommand(CompletionCommand());
 
   for (final t in tasks) {
     runner.addCommand(_TaskCommand(t));
@@ -139,6 +145,7 @@ class _TaskCommand extends Command {
       args: args,
       flags: flags,
       options: options,
+      stdin: stdin,
     );
 
     for (final dep in task.deps) {

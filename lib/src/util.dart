@@ -1,8 +1,10 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' hide stdin;
 
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
+
+import '_internal/stdin.dart';
 
 class Aborter {
   final _completer = Completer<int>();
@@ -36,26 +38,28 @@ Future<int> bash(
 }) async {
   aborter ??= Aborter();
 
-  final p = await Process.start(
-    'bash',
-    ['-c', script],
-    workingDirectory: workingDirectory,
-    environment: environment,
-    includeParentEnvironment: includeParentEnvironment,
-  );
-
-  final subscriptions = [
-    stdin.listen(p.stdin.add),
-    p.stdout.listen(stdout.add),
-    p.stderr.listen(stderr.add),
-  ];
-
-  sigterm(aborter).then((_) {
-    p.kill();
-  });
+  final List<StreamSubscription> subscriptions = [];
 
   try {
-    return p.exitCode;
+    final p = await Process.start(
+      'bash',
+      ['-c', script],
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
+
+    subscriptions.addAll([
+      stdin.listen(p.stdin.add),
+      p.stdout.listen(stdout.add),
+      p.stderr.listen(stderr.add),
+    ]);
+
+    sigterm(aborter).then((_) {
+      p.kill();
+    });
+
+    return await p.exitCode;
   } finally {
     aborter.abort(0);
     await Future.wait(subscriptions.map((e) => e.cancel()));
@@ -110,4 +114,21 @@ Future<int> watch(
   });
 
   return sigterm(aborter);
+}
+
+Future<List<FileSystemEntity>> find(
+  String pattern, {
+  bool file = true,
+  bool directory = true,
+}) async {
+  final glob = Glob(pattern);
+  final results = <FileSystemEntity>[];
+
+  await for (final entity in glob.list(followLinks: true)) {
+    final isTarget =
+        (entity is File && file) || (entity is Directory && directory);
+    if (isTarget) results.add(entity);
+  }
+
+  return results;
 }

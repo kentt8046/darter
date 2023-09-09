@@ -4,6 +4,7 @@ import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:darter/darter.dart';
+import 'package:darter/src/_internal/completion.dart';
 
 final taskFile = File("${Directory.current.path}/tools/tasks.dart");
 
@@ -22,7 +23,8 @@ Future<void> main(List<String> args) async {
   }
 
   final runner = CommandRunner("darter", "A simple task runner.")
-    ..addCommand(InitCommand());
+    ..addCommand(InitCommand())
+    ..addCommand(CompletionCommand());
 
   int code;
   try {
@@ -67,20 +69,23 @@ class InitCommand extends Command {
     }
 
     await Directory("tools").create(recursive: true);
+    await taskFile.writeAsString(tasksFile);
+  }
+}
 
-    await taskFile.writeAsString(r'''
+const tasksFile = r'''
 import 'package:darter/darter.dart';
 
 void main(List<String> args) {
   name = "example";
   description = "Example description";
-  run(args, [compile, read, withArgs, sleep, deps, decorate, watchSources]);
+  run(args, [activate, read, withArgs, sleep, deps, decorate, watchSources]);
 }
 
-final compile = Task(
-  "compile",
+final activate = Task(
+  "activate",
   "Compile to executable.",
-  (_) => bash("dart compile exe example/example.dart -o .dart_tool/example"),
+  (_) => bash("dart compile exe tools/tasks.dart -o /usr/local/bin/$name"),
 );
 
 final read = Task(
@@ -170,6 +175,4 @@ final watchSources = Task(
     );
   },
 );
-''');
-  }
-}
+''';

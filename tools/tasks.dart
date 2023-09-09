@@ -1,15 +1,15 @@
 import 'package:darter/darter.dart';
 
 void main(List<String> args) {
-  name = "example";
-  description = "Example description";
-  run(args, [compile, read, withArgs, sleep, deps, decorate, watchSources]);
+  // name = "example";
+  // description = "Example description";
+  run(args, [activate, read, withArgs, sleep, deps, decorate, watchSources]);
 }
 
-final compile = Task(
-  "compile",
+final activate = Task(
+  "activate",
   "Compile to executable.",
-  (_) => bash("dart compile exe example/example.dart -o .dart_tool/example"),
+  (_) => bash("dart compile exe tools/tasks.dart -o /usr/local/bin/$name"),
 );
 
 final read = Task(
