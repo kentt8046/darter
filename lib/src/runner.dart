@@ -13,11 +13,11 @@ import 'task.dart';
 String name = "darter";
 String description = "A simple task runner.";
 
-void run(List<String> args, List<Task> tasks) async {
+void run(List<String> args) async {
   final runner = CommandRunner(name, description)
     ..addCommand(CompletionCommand());
 
-  for (final t in tasks) {
+  for (final t in Task.tasks) {
     runner.addCommand(_TaskCommand(t));
   }
 
@@ -67,7 +67,7 @@ class _TaskCommand extends Command {
       }
 
       if (flagName == null) {
-        throw ArgumentError("Invalid flag name: $name");
+        throw ArgumentError("Invalid flag: $names");
       }
 
       argParser.addFlag(flagName, abbr: abbr, help: help);
@@ -116,7 +116,7 @@ class _TaskCommand extends Command {
       }
 
       if (optionName == null) {
-        throw ArgumentError("Invalid option name: $name");
+        throw ArgumentError("Invalid option: $names");
       }
 
       if (multiple) {
@@ -148,7 +148,7 @@ class _TaskCommand extends Command {
       stdin: stdin,
     );
 
-    for (final dep in task.deps) {
+    for (final dep in task.preTasks) {
       print(bold("pre task: ${dep.name}"));
       final code = await dep.action(context);
       if (code != 0) return code;

@@ -6,6 +6,8 @@ import 'package:glob/list_local_fs.dart';
 
 import '_internal/stdin.dart';
 
+final $ = Map<String, String>.unmodifiable(Platform.environment);
+
 class Aborter {
   final _completer = Completer<int>();
 
@@ -64,6 +66,26 @@ Future<int> bash(
     aborter.abort(0);
     await Future.wait(subscriptions.map((e) => e.cancel()));
   }
+}
+
+Future<(int code, String stdout)> exec(
+  String executable,
+  List<String> args, {
+  String? workingDirectory,
+  Map<String, String>? environment,
+  bool includeParentEnvironment = true,
+}) async {
+  final result = await Process.run(
+    executable,
+    args,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    includeParentEnvironment: includeParentEnvironment,
+  );
+
+  stderr.write(result.stderr);
+
+  return (result.exitCode, result.stdout as String);
 }
 
 Future<int> flow(List<Future<int> Function()> tasks) async {
