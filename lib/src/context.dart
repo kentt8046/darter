@@ -1,4 +1,4 @@
-class Context {
+final class Context {
   final List<String> args;
   final Map<String, bool> flags;
   final Map<String, dynamic> options;

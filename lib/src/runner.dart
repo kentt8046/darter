@@ -148,8 +148,10 @@ class _TaskCommand extends Command {
       stdin: stdin,
     );
 
-    for (final dep in task.preTasks) {
-      print(bold("pre task: ${dep.name}"));
+    final len = task.dependencies.length;
+    var i = 1;
+    for (final dep in task.dependencies) {
+      print(bold("pre task (${i++}/$len): ${dep.name}"));
       final code = await dep.action(context);
       if (code != 0) return code;
     }

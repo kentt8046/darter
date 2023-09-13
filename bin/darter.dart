@@ -130,7 +130,7 @@ final sleep = Task(
 final deps = Task(
   "deps",
   "Task with dependencies.",
-  deps: [sleep],
+  dependencies: [sleep],
   (_) {
     print("deps");
     return 0;

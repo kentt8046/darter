@@ -10,7 +10,7 @@ void main(List<String> args) {
     (_) => bash("dart compile exe tools/tasks.dart -o /usr/local/bin/$name"),
   );
 
-  Task(
+  final read = Task(
     "read",
     "Input read",
     (_) => bash(r"""
@@ -52,7 +52,7 @@ echo "Hello, $name!"
   Task(
     "deps",
     "Task with dependencies.",
-    preTasks: [sleep],
+    dependencies: [sleep, read],
     (_) {
       print("deps");
       return 0;
@@ -96,6 +96,12 @@ echo "Hello, $name!"
         },
       );
     },
+  );
+
+  Task(
+    "name",
+    "description",
+    noAction,
   );
 
   run(args);

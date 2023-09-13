@@ -52,7 +52,7 @@ echo "Hello, $name!"
   Task(
     "deps",
     "Task with dependencies.",
-    preTasks: [sleep],
+    dependencies: [sleep],
     (_) {
       print("deps");
       return 0;

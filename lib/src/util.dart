@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' hide stdin;
 
+import 'package:darter/src/context.dart';
 import 'package:glob/glob.dart';
 import 'package:glob/list_local_fs.dart';
 
@@ -8,7 +9,7 @@ import '_internal/stdin.dart';
 
 final $ = Map<String, String>.unmodifiable(Platform.environment);
 
-class Aborter {
+final class Aborter {
   final _completer = Completer<int>();
 
   Future<int> get code => _completer.future;
@@ -154,3 +155,5 @@ Future<List<FileSystemEntity>> find(
 
   return results;
 }
+
+int noAction(Context context) => 0;

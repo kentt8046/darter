@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'context.dart';
 
-class Task {
+final class Task {
   static final tasks = <Task>[];
 
   final String name;
   final FutureOr<int> Function(Context context) action;
-  final List<Task> preTasks;
+  final List<Task> dependencies;
   final String description;
   final Map<String, String> flags;
   final Map<String, String> options;
@@ -16,7 +16,7 @@ class Task {
     this.name,
     this.description,
     this.action, {
-    this.preTasks = const [],
+    this.dependencies = const [],
     this.flags = const {},
     this.options = const {},
     bool define = true,
